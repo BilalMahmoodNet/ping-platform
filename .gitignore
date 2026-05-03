@@ -1,0 +1,23 @@
+# Secrets — never commit these
+*.lic
+*.pem
+*.key
+*.p12
+*.pfx
+.env
+.env.*
+secrets/
+ 
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+ 
+# IDE
+.idea/
+.vscode/
+*.swp
+ 
+# Helm
+charts/
+*.tgz
