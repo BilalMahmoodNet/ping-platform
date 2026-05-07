@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pingfederate-engine
+  namespace: ping-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pingfederate
+      component: engine
+  template:
+    metadata:
+      labels:
+        app: pingfederate
+        component: engine
+    spec:
+      nodeSelector:
+        role: pf-engine
+      containers:
+      - name: pingfederate-engine
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: 9031
+          name: runtime
+        - containerPort: 7600
+          name: cluster
+        env:
+        - name: OPERATIONAL_MODE
+          value: CLUSTERED_ENGINE
+        - name: PF_ADMIN_PUBLIC_BASEURL
+          value: "https://pingfederate-admin:9999"
+        - name: CLUSTER_BIND_ADDRESS
+          value: "NON_LOOPBACK"
+        - name: DNS_PING_PROPERTIES
+          value: "dns_query=pingfederate-admin.ping-dev.svc.cluster.local"
+        - name: PING_IDENTITY_ACCEPT_EULA
+          value: "YES"
+        resources:
+          requests:
+            memory: {{ .Values.engine.resources.requests.memory }}
+            cpu: {{ .Values.engine.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.engine.resources.limits.memory }}
+            cpu: {{ .Values.engine.resources.limits.cpu }}
+        volumeMounts:
+        - name: license
+          mountPath: /opt/in/instance/server/default/conf/pingfederate.lic
+          subPath: pingfederate.lic
+      volumes:
+      - name: license
+        secret:
+          secretName: pingfederate-license

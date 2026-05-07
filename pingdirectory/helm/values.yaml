@@ -1,0 +1,19 @@
+image:
+  repository: pinglabacr.azurecr.io/pingdirectory
+  tag: latest
+  pullPolicy: Always
+
+nodeSelector:
+  role: pingdirectory
+
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "250m"
+  limits:
+    memory: "1Gi"
+    cpu: "500m"
+
+storage:
+  size: 5Gi
+  storageClass: managed-csi

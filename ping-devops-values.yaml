@@ -1,0 +1,72 @@
+global:
+  image:
+    pullPolicy: Always
+  license:
+    secret:
+      devOps: devops-secret
+
+pingfederate-admin:
+  enabled: true
+  image:
+    repositoryFqn: pinglabacr.azurecr.io/pingfederate
+    tag: latest
+  envs:
+    PING_IDENTITY_ACCEPT_EULA: "YES"
+  nodeSelector:
+    role: pf-admin
+  container:
+    tolerations:
+    - key: role
+      operator: Equal
+      value: pf-admin
+      effect: NoSchedule
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+
+pingfederate-engine:
+  enabled: true
+  image:
+    repositoryFqn: pinglabacr.azurecr.io/pingfederate
+    tag: latest
+  envs:
+    PING_IDENTITY_ACCEPT_EULA: "YES"
+  nodeSelector:
+    role: pf-engine
+  container:
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+
+pingdirectory:
+  enabled: true
+  image:
+    repositoryFqn: pinglabacr.azurecr.io/pingdirectory
+    tag: latest
+  envs:
+    PING_IDENTITY_ACCEPT_EULA: "YES"
+    MAX_HEAP_SIZE: "2g"
+    JVM_TUNING: "AGGRESSIVE"
+  nodeSelector:
+    role: pingdirectory
+  container:
+    tolerations:
+    - key: role
+      operator: Equal
+      value: pingdirectory
+      effect: NoSchedule
+    resources:
+      requests:
+        memory: "2Gi"
+        cpu: "500m"
+      limits:
+        memory: "4Gi"
+        cpu: "1000m"

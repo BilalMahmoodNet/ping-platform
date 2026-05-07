@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pingfederate-engine
+  namespace: ping-dev
+spec:
+  selector:
+    app: pingfederate
+    component: engine
+  ports:
+  - name: runtime
+    port: 9031
+    targetPort: 9031
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pingfederate-admin
+  namespace: ping-dev
+spec:
+  selector:
+    app: pingfederate
+    component: admin
+  ports:
+  - name: admin
+    port: 9999
+    targetPort: 9999

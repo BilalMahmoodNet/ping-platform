@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pingfederate-admin
+  namespace: ping-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pingfederate
+      component: admin
+  template:
+    metadata:
+      labels:
+        app: pingfederate
+        component: admin
+    spec:
+      nodeSelector:
+        role: pf-admin
+      tolerations:
+      - key: role
+        operator: Equal
+        value: pf-admin
+        effect: NoSchedule
+      initContainers:
+      - name: wait-for-engine
+        image: busybox
+        command: ['sh', '-c', 'until nc -z pingfederate-engine 9031; do echo waiting for engine; sleep 5; done']
+      containers:
+      - name: pingfederate-admin
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: 9999
+          name: admin
+        env:
+        - name: OPERATIONAL_MODE
+          value: CLUSTERED_CONSOLE
+        - name: PF_ADMIN_PUBLIC_BASEURL
+          value: "https://pingfederate-admin:9999"
+        - name: PF_ENGINE_PUBLIC_BASE_URL
+          value: "https://pingfederate-engine:9031"
+        - name: CLUSTER_BIND_ADDRESS
+          value: "NON_LOOPBACK"
+        - name: DNS_PING_PROPERTIES
+          value: "dns_query=pingfederate-engine.ping-dev.svc.cluster.local"
+        - name: PING_IDENTITY_ACCEPT_EULA
+          value: "YES"
+        resources:
+          requests:
+            memory: {{ .Values.admin.resources.requests.memory }}
+            cpu: {{ .Values.admin.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.admin.resources.limits.memory }}
+            cpu: {{ .Values.admin.resources.limits.cpu }}
+        volumeMounts:
+        - name: license
+          mountPath: /opt/in/instance/server/default/conf/pingfederate.lic
+          subPath: pingfederate.lic
+      volumes:
+      - name: license
+        secret:
+          secretName: pingfederate-license

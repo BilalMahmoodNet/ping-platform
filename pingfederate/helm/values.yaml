@@ -1,0 +1,26 @@
+image:
+  repository: pinglabacr.azurecr.io/pingfederate
+  tag: latest
+  pullPolicy: Always
+
+engine:
+  nodeSelector:
+    role: pf-engine
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+
+admin:
+  nodeSelector:
+    role: pf-admin
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"

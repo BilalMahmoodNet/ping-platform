@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pingdirectory
+  namespace: ping-dev
+spec:
+  serviceName: pingdirectory-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pingdirectory
+  template:
+    metadata:
+      labels:
+        app: pingdirectory
+    spec:
+      nodeSelector:
+        role: pingdirectory
+      tolerations:
+      - key: role
+        operator: Equal
+        value: pingdirectory
+        effect: NoSchedule
+      securityContext:
+        fsGroup: 9999
+      initContainers:
+      - name: fix-permissions
+        image: busybox
+        command: ['sh', '-c', 'chmod -R 777 /opt/out']
+        volumeMounts:
+        - name: pd-data
+          mountPath: /opt/out/instance
+        securityContext:
+          runAsUser: 0
+      containers:
+      - name: pingdirectory
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        securityContext:
+          runAsUser: 0
+          runAsNonRoot: false
+        ports:
+        - containerPort: 389
+          name: ldap
+        - containerPort: 636
+          name: ldaps
+        - containerPort: 443
+          name: https
+        env:
+        - name: PING_IDENTITY_ACCEPT_EULA
+          value: "YES"
+        - name: ROOT_USER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: pingdirectory-secrets
+              key: ROOT_USER_PASSWORD
+        resources:
+          requests:
+            memory: {{ .Values.resources.requests.memory }}
+            cpu: {{ .Values.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.resources.limits.memory }}
+            cpu: {{ .Values.resources.limits.cpu }}
+        volumeMounts:
+        - name: license
+          mountPath: /opt/staging/pd.profile/server-root/pre-setup/PingDirectory.lic
+          subPath: PingDirectory.lic
+        - name: pd-data
+          mountPath: /opt/out/instance
+      volumes:
+      - name: license
+        secret:
+          secretName: pingdirectory-license
+  volumeClaimTemplates:
+  - metadata:
+      name: pd-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: {{ .Values.storage.storageClass }}
+      resources:
+        requests:
+          storage: {{ .Values.storage.size }}
