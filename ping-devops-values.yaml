@@ -15,6 +15,9 @@ pingfederate-admin:
   nodeSelector:
     role: pf-admin
   container:
+    envFrom:
+    - secretRef:
+        name: pingfederate-admin-secret
     tolerations:
     - key: role
       operator: Equal
@@ -38,6 +41,9 @@ pingfederate-engine:
   nodeSelector:
     role: pf-engine
   container:
+    envFrom:
+    - secretRef:
+        name: pingfederate-admin-secret
     resources:
       requests:
         memory: "512Mi"
@@ -58,6 +64,9 @@ pingdirectory:
   nodeSelector:
     role: pingdirectory
   container:
+    envFrom:
+    - secretRef:
+        name: pingdirectory-secrets
     tolerations:
     - key: role
       operator: Equal
@@ -70,3 +79,27 @@ pingdirectory:
       limits:
         memory: "4Gi"
         cpu: "1000m"
+    probes:
+      livenessProbe:
+        exec:
+          command:
+          - /opt/liveness.sh
+        initialDelaySeconds: 30
+        periodSeconds: 30
+        timeoutSeconds: 10
+        failureThreshold: 10
+      readinessProbe:
+        exec:
+          command:
+          - /opt/readiness.sh
+        initialDelaySeconds: 30
+        periodSeconds: 15
+        timeoutSeconds: 10
+        failureThreshold: 10
+      startupProbe:
+        exec:
+          command:
+          - /opt/liveness.sh
+        periodSeconds: 15
+        timeoutSeconds: 10
+        failureThreshold: 120
