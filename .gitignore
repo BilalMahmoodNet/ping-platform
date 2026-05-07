@@ -22,3 +22,10 @@ secrets/
 charts/
 *.tgz
 ping-devops-values.yaml
+
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+*.tfplan
