@@ -21,3 +21,4 @@ secrets/
 # Helm
 charts/
 *.tgz
+ping-devops-values.yaml
