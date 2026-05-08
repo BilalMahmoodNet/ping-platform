@@ -12,6 +12,8 @@ pingfederate-admin:
     tag: latest
   envs:
     PING_IDENTITY_ACCEPT_EULA: "YES"
+    SERVER_PROFILE_URL: "https://github.com/BilalMahmoodNet/ping-platform"
+    SERVER_PROFILE_PATH: "pingfederate/config"
   nodeSelector:
     role: pf-admin
   container:
@@ -38,6 +40,8 @@ pingfederate-engine:
     tag: latest
   envs:
     PING_IDENTITY_ACCEPT_EULA: "YES"
+    SERVER_PROFILE_URL: "https://github.com/BilalMahmoodNet/ping-platform"
+    SERVER_PROFILE_PATH: "pingfederate/config"
   nodeSelector:
     role: pf-engine
   container:
